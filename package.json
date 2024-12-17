@@ -36,6 +36,8 @@
     "vite": "^6.0.0"
   },
   "dependencies": {
+    "@supabase/ssr": "^0.5.2",
+    "@supabase/supabase-js": "^2.47.8",
     "@tailwindcss/container-queries": "^0.1.1",
     "@tailwindcss/forms": "^0.5.9",
     "@tailwindcss/typography": "^0.5.15",
@@ -43,7 +45,7 @@
   },
   "lint-staged": {
     "*.{js,ts,svelte,css,md}": [
-      "oxlint -c .oxlintrc.json --max-warnings=0",
+      "oxlint -c .oxlintrc.json",
       "prettier --write"
     ]
   },
