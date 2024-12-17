@@ -18,7 +18,7 @@ const main = async () => {
 			owner_id: copycat.oneOf(seed, users).id,
 			reviews: (x) =>
 				x({ max: users.length }, ({ seed, index }) => ({
-					profile_id: users[index].id,
+					author_id: users[index].id,
 					rating: copycat.float(seed, { min: 0, max: 5 })
 				})),
 			products: (x) =>
