@@ -3366,9 +3366,9 @@
           "maxLength": null
         },
         {
-          "id": "public.reviews.profile_id",
-          "name": "profile_id",
-          "columnName": "profile_id",
+          "id": "public.reviews.author_id",
+          "name": "author_id",
+          "columnName": "author_id",
           "type": "uuid",
           "isRequired": true,
           "kind": "scalar",
@@ -3418,7 +3418,7 @@
           "kind": "object",
           "relationName": "reviewsToprofiles",
           "relationFromFields": [
-            "profile_id"
+            "author_id"
           ],
           "relationToFields": [
             "id"
@@ -3432,17 +3432,17 @@
       ],
       "uniqueConstraints": [
         {
-          "name": "reviews_pkey",
+          "name": "reviews_author_id_business_id_key",
           "fields": [
-            "id"
+            "author_id",
+            "business_id"
           ],
           "nullNotDistinct": false
         },
         {
-          "name": "reviews_profile_id_business_id_key",
+          "name": "reviews_pkey",
           "fields": [
-            "business_id",
-            "profile_id"
+            "id"
           ],
           "nullNotDistinct": false
         }
