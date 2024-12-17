@@ -34,7 +34,7 @@ create table PRODUCTS(
   name varchar not null,
   price numeric(12,2) not null check(price>=0),
   description text,
-  business_id int,
+  business_id int not null,
   FOREIGN KEY (business_id) REFERENCES public.business(id) on delete cascade on update cascade
 );
 

@@ -2911,7 +2911,7 @@
           "name": "business_id",
           "columnName": "business_id",
           "type": "int4",
-          "isRequired": false,
+          "isRequired": true,
           "kind": "scalar",
           "isList": false,
           "isGenerated": false,
@@ -2923,7 +2923,7 @@
         {
           "name": "business",
           "type": "business",
-          "isRequired": false,
+          "isRequired": true,
           "kind": "object",
           "relationName": "productsTobusiness",
           "relationFromFields": [
