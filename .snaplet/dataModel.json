@@ -613,6 +613,20 @@
           "maxLength": null
         },
         {
+          "id": "public.business_images.image",
+          "name": "image",
+          "columnName": "image",
+          "type": "varchar",
+          "isRequired": true,
+          "kind": "scalar",
+          "isList": false,
+          "isGenerated": false,
+          "sequence": false,
+          "hasDefaultValue": false,
+          "isId": false,
+          "maxLength": null
+        },
+        {
           "name": "business",
           "type": "business",
           "isRequired": true,
@@ -2785,9 +2799,9 @@
           "maxLength": null
         },
         {
-          "id": "public.product_images.url",
-          "name": "url",
-          "columnName": "url",
+          "id": "public.product_images.image",
+          "name": "image",
+          "columnName": "image",
           "type": "varchar",
           "isRequired": true,
           "kind": "scalar",
@@ -2803,7 +2817,7 @@
           "name": "product_id",
           "columnName": "product_id",
           "type": "int4",
-          "isRequired": false,
+          "isRequired": true,
           "kind": "scalar",
           "isList": false,
           "isGenerated": false,
@@ -2815,7 +2829,7 @@
         {
           "name": "products",
           "type": "products",
-          "isRequired": false,
+          "isRequired": true,
           "kind": "object",
           "relationName": "product_imagesToproducts",
           "relationFromFields": [
@@ -2983,9 +2997,9 @@
           "maxLength": null
         },
         {
-          "id": "public.profile_pictures.url",
-          "name": "url",
-          "columnName": "url",
+          "id": "public.profile_pictures.image",
+          "name": "image",
+          "columnName": "image",
           "type": "varchar",
           "isRequired": true,
           "kind": "scalar",

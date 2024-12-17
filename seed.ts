@@ -2,6 +2,31 @@ import { copycat } from '@snaplet/copycat';
 import { createSeedClient, SeedClient } from '@snaplet/seed';
 import bcrypt from 'bcrypt';
 
+/*
+const profilePictures = [
+  'https://images.pexels.com/photos/678783/pexels-photo-678783.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=1',
+  'https://images.pexels.com/photos/1080213/pexels-photo-1080213.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=1',
+  'https://images.pexels.com/photos/2589653/pexels-photo-2589653.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=1',
+  'https://images.pexels.com/photos/1081685/pexels-photo-1081685.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=1',
+  'https://images.pexels.com/photos/1462980/pexels-photo-1462980.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=1',
+]*/
+
+const businessPictures = [
+	'https://images.pexels.com/photos/25713077/pexels-photo-25713077/free-photo-of-compras-comprando-mercado-estar-de-pie.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=1',
+	'https://images.pexels.com/photos/25255085/pexels-photo-25255085/free-photo-of-zapatos-lineas-compras-comprando.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=1',
+	'https://images.pexels.com/photos/14083994/pexels-photo-14083994.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=1',
+	'https://images.pexels.com/photos/27376928/pexels-photo-27376928/free-photo-of-ciudad-trafico-hombre-acera.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=1',
+	'https://images.pexels.com/photos/29776877/pexels-photo-29776877/free-photo-of-puesto-de-dulces-en-el-mercadillo-navideno-de-kassel.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=1'
+];
+
+const productPictures = [
+	'https://images.pexels.com/photos/335257/pexels-photo-335257.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=1',
+	'https://images.pexels.com/photos/1667088/pexels-photo-1667088.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=1',
+	'https://images.pexels.com/photos/2536965/pexels-photo-2536965.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=1',
+	'https://images.pexels.com/photos/248412/pexels-photo-248412.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=1',
+	'https://images.pexels.com/photos/3819969/pexels-photo-3819969.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=1'
+];
+
 const main = async () => {
 	const seed = await createSeedClient();
 
@@ -9,13 +34,17 @@ const main = async () => {
 	await seed.$resetDatabase();
 
 	// Seed the database with 10 users
-	const { users } = await createUsers(seed, 3);
+	const { users } = await createUsers(seed, 10);
 
 	// Seed the rest of the tables
 	await seed.business((x) =>
-		x(users.length, ({ seed }) => ({
+		x(4, ({ seed }) => ({
 			name: copycat.streetName(seed),
 			owner_id: copycat.oneOf(seed, users).id,
+			business_images: (x) =>
+				x({ max: businessPictures.length }, ({ seed }) => ({
+					image: copycat.oneOf(seed, businessPictures)
+				})),
 			reviews: (x) =>
 				x({ max: users.length }, ({ seed, index }) => ({
 					author_id: users[index].id,
@@ -25,7 +54,11 @@ const main = async () => {
 				x({ max: 10 }, ({ seed }) => ({
 					price: copycat.float(seed, { min: 0, max: 500000 }),
 					name: copycat.words(seed, { max: 3 }),
-					description: copycat.sentence(seed, { minWords: 10, max: 50 })
+					description: copycat.sentence(seed, { minWords: 10, max: 50 }),
+					product_images: (x) =>
+						x({ max: productPictures.length }, ({ seed }) => ({
+							image: copycat.oneOf(seed, productPictures)
+						}))
 				}))
 		}))
 	);
