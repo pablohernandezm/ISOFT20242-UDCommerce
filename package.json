@@ -14,14 +14,19 @@
     "prepare": "husky install"
   },
   "devDependencies": {
+    "@snaplet/copycat": "^5.1.0",
+    "@snaplet/seed": "0.98.0",
     "@sveltejs/adapter-auto": "^3.0.0",
     "@sveltejs/adapter-vercel": "^5.5.2",
     "@sveltejs/kit": "^2.9.0",
     "@sveltejs/vite-plugin-svelte": "^5.0.0",
+    "@types/bcrypt": "^5.0.2",
+    "@types/pg": "^8.11.10",
     "autoprefixer": "^10.4.20",
     "husky": "^9.1.7",
     "lint-staged": "^15.2.11",
     "oxlint": "^0.15.2",
+    "pg": "^8.13.1",
     "prettier": "^3.3.2",
     "prettier-plugin-svelte": "^3.2.6",
     "svelte": "^5.0.0",
@@ -33,12 +38,13 @@
   "dependencies": {
     "@tailwindcss/container-queries": "^0.1.1",
     "@tailwindcss/forms": "^0.5.9",
-    "@tailwindcss/typography": "^0.5.15"
+    "@tailwindcss/typography": "^0.5.15",
+    "bcrypt": "^5.1.1"
   },
   "lint-staged": {
     "*.{js,ts,svelte,css,md}": [
-      "lint",
-      "format"
+      "oxlint -c .oxlintrc.json --max-warnings=0",
+      "prettier --write"
     ]
   },
   "husky": {
