@@ -1,36 +1,38 @@
 -- BUSINESS IMAGES
-alter table public.business_images enable row level security;
+ALTER TABLE public.business_images enable ROW level security;
 
-create policy "All Business images can be selected"
-on public.business_images for select to authenticated, anon 
-  using(true);
 
-create policy "Business images can be inserted only by the business owner"
-on public.business_images for insert to authenticated
-  with check (
-    public.is_business_member(public.business_images.business_id)
-);
+CREATE POLICY "All Business images can be selected" ON public.business_images FOR
+SELECT
+	TO authenticated,
+	anon USING (TRUE);
 
-create policy "Business images can be updated only by the business owner"
-on public.business_images for update to authenticated
-using (  
-  public.is_business_member(public.business_images.business_id)
-) 
-with check (
-  public.is_business_member(public.business_images.business_id)
-);
 
-create policy "Business images can be deleted only by the business owner"
-on public.business_images for delete to authenticated
-using (
-  public.is_business_member(public.business_images.business_id)
+CREATE POLICY "Business images can be inserted only by the business owner" ON public.business_images FOR insert TO authenticated
+WITH
+	CHECK (
+		public.is_business_member (public.business_images.business_id)
+	);
+
+
+CREATE POLICY "Business images can be updated only by the business owner" ON public.business_images
+FOR UPDATE
+	TO authenticated USING (
+		public.is_business_member (public.business_images.business_id)
+	)
+WITH
+	CHECK (
+		public.is_business_member (public.business_images.business_id)
+	);
+
+
+CREATE POLICY "Business images can be deleted only by the business owner" ON public.business_images FOR delete TO authenticated USING (
+	public.is_business_member (public.business_images.business_id)
 );
 
 
 -- PRODUCT IMAGES
-create function public.is_business_member_from_product(product_id int, userid uuid default auth.uid())
-returns boolean 
-as $$
+CREATE FUNCTION public.is_business_member_from_product (product_id INT, userid UUID DEFAULT auth.uid ()) returns BOOLEAN AS $$
 BEGIN
   return (exists(
     select 1 from public.products p 
@@ -42,50 +44,81 @@ END;
 $$ language plpgsql security invoker;
 
 
-alter table public.product_images enable row level security;
+ALTER TABLE public.product_images enable ROW level security;
 
-create policy "All product images can be selected"
-on public.product_images for select to authenticated, anon 
-  using(true);
 
-create policy "Product images can be inserted only by the business owner"
-on public.product_images for insert to authenticated
-  with check (
-    public.is_business_member_from_product(public.product_images.product_id)
-);
+CREATE POLICY "All product images can be selected" ON public.product_images FOR
+SELECT
+	TO authenticated,
+	anon USING (TRUE);
 
-create policy "Product images can be updated only by the business owner"
-on public.product_images for update to authenticated
-using (  
-  public.is_business_member_from_product(public.product_images.product_id)
-) 
-with check (
-  public.is_business_member_from_product(public.product_images.product_id)
-);
 
-create policy "Product images can be deleted only by the business owner"
-on public.product_images for delete to authenticated
-using (
-  public.is_business_member_from_product(public.product_images.product_id)
+CREATE POLICY "Product images can be inserted only by the business owner" ON public.product_images FOR insert TO authenticated
+WITH
+	CHECK (
+		public.is_business_member_from_product (public.product_images.product_id)
+	);
+
+
+CREATE POLICY "Product images can be updated only by the business owner" ON public.product_images
+FOR UPDATE
+	TO authenticated USING (
+		public.is_business_member_from_product (public.product_images.product_id)
+	)
+WITH
+	CHECK (
+		public.is_business_member_from_product (public.product_images.product_id)
+	);
+
+
+CREATE POLICY "Product images can be deleted only by the business owner" ON public.product_images FOR delete TO authenticated USING (
+	public.is_business_member_from_product (public.product_images.product_id)
 );
 
 
 -- PROFILE PICTURES
-alter table public.profile_pictures enable row level security;
+ALTER TABLE public.profile_pictures enable ROW level security;
 
-create policy "All profile pictures can be selected"
-on public.profile_pictures for select to authenticated, anon
-using (true);
 
-create policy "Profile pictures can be inserted by its owner"
-on public.profile_pictures for insert to authenticated, anon
-with check(profile_id = (select auth.uid()));
+CREATE POLICY "All profile pictures can be selected" ON public.profile_pictures FOR
+SELECT
+	TO authenticated,
+	anon USING (TRUE);
 
-create policy "Profile pictures can be updated by its owner"
-on public.profile_pictures for update to authenticated, anon
-using (profile_id = (select auth.uid()))
-with check (profile_id = (select auth.uid()));
 
-create policy "Profile pictures can be deleted by its owner"
-on public.profile_pictures for delete to authenticated, anon
-using (profile_id = (select auth.uid()));
+CREATE POLICY "Profile pictures can be inserted by its owner" ON public.profile_pictures FOR insert TO authenticated,
+anon
+WITH
+	CHECK (
+		profile_id = (
+			SELECT
+				auth.uid ()
+		)
+	);
+
+
+CREATE POLICY "Profile pictures can be updated by its owner" ON public.profile_pictures
+FOR UPDATE
+	TO authenticated,
+	anon USING (
+		profile_id = (
+			SELECT
+				auth.uid ()
+		)
+	)
+WITH
+	CHECK (
+		profile_id = (
+			SELECT
+				auth.uid ()
+		)
+	);
+
+
+CREATE POLICY "Profile pictures can be deleted by its owner" ON public.profile_pictures FOR delete TO authenticated,
+anon USING (
+	profile_id = (
+		SELECT
+			auth.uid ()
+	)
+);

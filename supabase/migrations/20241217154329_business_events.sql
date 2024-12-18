@@ -1,18 +1,42 @@
-alter table public.business enable row level security;
+ALTER TABLE public.business enable ROW level security;
 
-create policy "All business can be selected"
-on public.business for select to authenticated, anon 
-  using (true);
 
-create policy "Business can be inserted only by its owner"
-on public.business for insert to authenticated
-  with check ((select auth.uid()) = owner_id);
+CREATE POLICY "All business can be selected" ON public.business FOR
+SELECT
+	TO authenticated,
+	anon USING (TRUE);
 
-create policy "Business can be updated only by its owner"
-on public.business for update to authenticated
-using ((select auth.uid()) = owner_id) 
-with check ((select auth.uid())=owner_id);
 
-create policy "Business can be deleted only by its owner"
-on public.business for delete to authenticated
-using ((select auth.uid())=owner_id);
+CREATE POLICY "Business can be inserted only by its owner" ON public.business FOR insert TO authenticated
+WITH
+	CHECK (
+		(
+			SELECT
+				auth.uid ()
+		) = owner_id
+	);
+
+
+CREATE POLICY "Business can be updated only by its owner" ON public.business
+FOR UPDATE
+	TO authenticated USING (
+		(
+			SELECT
+				auth.uid ()
+		) = owner_id
+	)
+WITH
+	CHECK (
+		(
+			SELECT
+				auth.uid ()
+		) = owner_id
+	);
+
+
+CREATE POLICY "Business can be deleted only by its owner" ON public.business FOR delete TO authenticated USING (
+	(
+		SELECT
+			auth.uid ()
+	) = owner_id
+);

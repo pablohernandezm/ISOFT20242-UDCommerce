@@ -1,27 +1,50 @@
-alter  table public.profiles enable row level security;
+ALTER TABLE public.profiles enable ROW level security;
 
-create policy "All profiles can be selected"
-on public.profiles for select to authenticated, anon
-  using(true);
 
-create policy "Profiles can be inserted only by its owner"
-on public.profiles for insert to authenticated
-  with check ((select auth.uid()) = id);
+CREATE POLICY "All profiles can be selected" ON public.profiles FOR
+SELECT
+	TO authenticated,
+	anon USING (TRUE);
 
-create policy "Profiles can be updated only by its owner"
-on public.profiles for update to authenticated
-using ((select auth.uid()) = id) 
-with check ((select auth.uid())=id);
 
-create policy "Profiles can be deleted only by its owner"
-on public.profiles for delete to authenticated
-using ((select auth.uid())=id);
+CREATE POLICY "Profiles can be inserted only by its owner" ON public.profiles FOR insert TO authenticated
+WITH
+	CHECK (
+		(
+			SELECT
+				auth.uid ()
+		) = id
+	);
 
-create function public.handle_remove_profile()
-returns trigger 
-language plpgsql
-security definer set search_path=''
-as $$
+
+CREATE POLICY "Profiles can be updated only by its owner" ON public.profiles
+FOR UPDATE
+	TO authenticated USING (
+		(
+			SELECT
+				auth.uid ()
+		) = id
+	)
+WITH
+	CHECK (
+		(
+			SELECT
+				auth.uid ()
+		) = id
+	);
+
+
+CREATE POLICY "Profiles can be deleted only by its owner" ON public.profiles FOR delete TO authenticated USING (
+	(
+		SELECT
+			auth.uid ()
+	) = id
+);
+
+
+CREATE FUNCTION public.handle_remove_profile () returns trigger language plpgsql security definer
+SET
+	search_path = '' AS $$
 begin
   delete from auth.users where  auth.users.id = old.id;
 
@@ -29,6 +52,7 @@ begin
 end;
 $$;
 
-create  trigger on_profile_deleted
-after delete on public.profiles
-for each row execute procedure public.handle_remove_profile();
+
+CREATE TRIGGER on_profile_deleted
+AFTER delete ON public.profiles FOR each ROW
+EXECUTE procedure public.handle_remove_profile ();
