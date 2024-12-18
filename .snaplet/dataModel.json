@@ -3352,9 +3352,9 @@
           "maxLength": null
         },
         {
-          "id": "public.reviews.rating",
-          "name": "rating",
-          "columnName": "rating",
+          "id": "public.reviews.rate",
+          "name": "rate",
+          "columnName": "rate",
           "type": "numeric",
           "isRequired": true,
           "kind": "scalar",

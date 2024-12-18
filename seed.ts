@@ -48,7 +48,7 @@ const main = async () => {
 			reviews: (x) =>
 				x({ max: users.length }, ({ seed, index }) => ({
 					author_id: users[index].id,
-					rating: copycat.float(seed, { min: 0, max: 5 })
+					rate: copycat.float(seed, { min: 0, max: 5 })
 				})),
 			products: (x) =>
 				x({ max: 10 }, ({ seed }) => ({
