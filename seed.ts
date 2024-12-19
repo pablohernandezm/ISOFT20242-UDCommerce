@@ -67,14 +67,23 @@ async function createUsers(n: number = 1, defaultPassword = 'password') {
 	}
 }
 
+const centerPoint = { lat: 10.402713624079588, lon: -75.50559166984263 };
+const radius = 0.1;
+const nBusines = 4;
+
 async function seedAll(seed: SeedClient) {
 	const { data: profilesData } = await supabase.from('profiles').select('*');
 	const profiles: profilesScalars[] = profilesData?.map((profile) => profile) ?? [];
 
+	const points = Array.from({ length: nBusines }, () =>
+		getRandomCoordinatesAroundPoint(centerPoint.lat, centerPoint.lon, radius)
+	);
+
 	await seed.business(
 		(x) =>
-			x(4, ({ seed }) => ({
+			x(nBusines, ({ seed, index }) => ({
 				name: copycat.streetName(seed),
+				location: `${points[index].latitude}, ${points[index].longitude}`,
 				business_images: (x) =>
 					x({ max: businessPictures.length }, ({ seed }) => ({
 						image: copycat.oneOf(seed, businessPictures)
@@ -99,4 +108,28 @@ async function seedAll(seed: SeedClient) {
 	);
 
 	console.log('Database seeded successfully!');
+}
+
+function getRandomCoordinatesAroundPoint(
+	centerLat: number,
+	centerLon: number,
+	radiusKm: number
+): { latitude: number; longitude: number } {
+	const earthRadius = 6371; // Radio de la Tierra en km
+
+	// Generar un ángulo aleatorio entre 0 y 2π
+	const angle = Math.random() * 2 * Math.PI;
+
+	// Generar una distancia aleatoria dentro del radio
+	const distance = Math.random() * radiusKm;
+
+	// Calcular desplazamientos en latitud y longitud
+	const deltaLat = distance / earthRadius;
+	const deltaLon = distance / (earthRadius * Math.cos((centerLat * Math.PI) / 180));
+
+	// Calcular las nuevas coordenadas
+	const newLat = centerLat + deltaLat * Math.cos(angle) * (180 / Math.PI);
+	const newLon = centerLon + deltaLon * Math.sin(angle) * (180 / Math.PI);
+
+	return { latitude: newLat, longitude: newLon };
 }

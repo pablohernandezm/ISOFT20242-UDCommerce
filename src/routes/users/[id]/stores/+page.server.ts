@@ -1,6 +1,7 @@
 import { BusinessController } from '$lib/server/business';
 import { ProfileController } from '$lib/server/profile';
-import type { PageServerLoad } from './$types';
+import { fail } from '@sveltejs/kit';
+import type { Actions, PageServerLoad } from './$types';
 
 export const load: PageServerLoad = async ({ url, locals: { supabase }, params }) => {
 	const page = parseInt(url.searchParams.get('page') || '1');
@@ -9,7 +10,7 @@ export const load: PageServerLoad = async ({ url, locals: { supabase }, params }
 
 	const { data, error } = await BusinessController(supabase).getBusinessResume({
 		businessLimit: limit,
-		productLimit: 2,
+		productLimit: 100,
 		offset,
 		owner_id: params.id
 	});
@@ -31,3 +32,30 @@ export const load: PageServerLoad = async ({ url, locals: { supabase }, params }
 		limit
 	};
 };
+
+export const actions: Actions = {
+	profile: async ({ locals: { supabase }, request, params }) => {
+		const formData = await request.formData();
+
+		const first_name = formData.get('first_name') as string;
+		const last_name = formData.get('last_name') as string;
+
+		if (!first_name || !last_name) {
+			return fail(400, { message: 'Al menos uno de tus nombres debe estar registrado.' });
+		}
+
+		const { error } = await supabase
+			.from('profiles')
+			.update({ first_name, last_name })
+			.eq('id', params.id);
+
+		if (error) {
+			console.error(error);
+			return fail(400, { error });
+		}
+
+		return {
+			success: true
+		};
+	}
+} satisfies Actions;

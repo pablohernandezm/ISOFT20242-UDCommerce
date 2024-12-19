@@ -8,6 +8,7 @@
 	import AccessDialog from '$lib/components/ui/AccessDialog.svelte';
 	import HeaderIcon from '$lib/components/ui/HeaderIcon.svelte';
 	import { Toaster } from '$lib/components/ui/sonner';
+	import Map from '$lib/components/ui/Map.svelte';
 
 	let { data, children } = $props();
 	let { session, supabase } = $derived(data);
@@ -29,7 +30,9 @@
 		<nav>
 			<ul class="flex justify-between">
 				<div>
-					<HeaderIcon src={'/icons/map.svg'} alt={'abrir mapa'} />
+					<Map>
+						<HeaderIcon src={'/icons/map.svg'} alt={'abrir mapa'} />
+					</Map>
 				</div>
 				<div class="flex gap-1">
 					<a href="/">
@@ -38,7 +41,7 @@
 
 					{#if data.session}
 						<a href={`/users/${data.session.user.id}/stores`}>
-							<HeaderIcon src={'/icons/storefront.svg'} alt={'Tu negocio'} />
+							<HeaderIcon src={'/icons/storefront.svg'} alt={'Ver tu perfil'} />
 						</a>
 					{/if}
 

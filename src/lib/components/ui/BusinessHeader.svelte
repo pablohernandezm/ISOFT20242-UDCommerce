@@ -26,8 +26,6 @@
 	let oldRate = user_rate ?? 0;
 	let href = $derived(`/stores/${business_id}`);
 
-	$inspect(selectedRating, rating);
-
 	$effect(() => {
 		if (user_rate) {
 			untrack(() => {
@@ -67,7 +65,7 @@
 	<div>
 		<div class="flex gap-2">
 			<a {href}>
-				<h2 class="font-bold text-xl">{name}{key}</h2>
+				<h2 class="font-bold text-xl">{name}</h2>
 			</a>
 
 			<svg

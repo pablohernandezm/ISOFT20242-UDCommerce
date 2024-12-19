@@ -1,5 +1,6 @@
-import type { Database } from '$lib/types/database';
+import type { Database, TablesInsert } from '$lib/types/database';
 import type { SupabaseClient } from '@supabase/supabase-js';
+import { POST } from '../../routes/auth/+server';
 
 export function BusinessController(supabase: SupabaseClient<Database>) {
 	return {
@@ -38,25 +39,16 @@ export function BusinessController(supabase: SupabaseClient<Database>) {
 
 			return { data };
 		},
-		getBusinessInfo: async (options: {
-			productLimit: number;
-			businessLimit: number;
-			offset: number;
-			business_id: string;
-			image_limit?: number;
-		}) => {
-			const { offset, businessLimit, business_id, image_limit } = options;
+		getBusinessInfo: async (options: { business_id: string; image_limit?: number }) => {
+			const { business_id, image_limit } = options;
 
-			let query = supabase
-				.from('business')
-				.select(
-					`
+			let query = supabase.from('business').select(
+				`
         *,
         business_images:business_images(*),
         reviews_summary:business_reviews_summary(*)
       `
-				)
-				.range(offset, offset + businessLimit - 1); // Paginación para los negocios
+			);
 
 			if (image_limit) {
 				query = query.limit(image_limit, { foreignTable: 'business_images' });
@@ -65,7 +57,50 @@ export function BusinessController(supabase: SupabaseClient<Database>) {
 				query = query.eq('id', business_id);
 			}
 
+			const { data, error } = await query.limit(1).single();
+			if (error) {
+				console.error(error);
+				return { error };
+			}
+
+			return { data };
+		},
+		getBusinessLocations: async (options?: { businessLimit: number; offset: number }) => {
+			let query = supabase.from('business').select('id,location');
+
+			if (options) {
+				const { offset, businessLimit } = options;
+				query = query.range(offset, offset + businessLimit - 1);
+			}
+
 			const { data, error } = await query;
+
+			if (error) {
+				console.error(error);
+				return { error };
+			}
+
+			return { data };
+		},
+		createBusiness: async (data: TablesInsert<'business'>) => {
+			const { data: newData, error } = await supabase
+				.from('business')
+				.insert(data)
+				.select()
+				.single();
+
+			if (error) {
+				return { error };
+			}
+
+			return { data: newData };
+		},
+		getBusinessProducts: async (business_id: number) => {
+			const { data, error } = await supabase
+				.from('products')
+				.select('*, images:product_images(*)')
+				.eq('business_id', business_id);
+
 			if (error) {
 				console.error(error);
 				return { error };
