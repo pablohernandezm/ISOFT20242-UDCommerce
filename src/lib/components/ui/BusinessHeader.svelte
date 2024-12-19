@@ -98,7 +98,7 @@
 					checked={i <= rating}
 					data-checked={selectedRating ? selectedRating >= rate : i + 1 <= rating}
 				/>
-				<label for={id}>
+				<label for={id} class="text-zinc-200 pointer">
 					<svg
 						xmlns="http://www.w3.org/2000/svg"
 						width="24"
@@ -123,18 +123,16 @@
 
 <style>
 	input {
-		@apply opacity-0 absolute;
+		opacity: 0;
+		position: absolute;
 	}
 	label > svg {
 		fill: currentColor;
 		stroke: currentColor;
 	}
-	label {
-		@apply text-zinc-200 cursor-pointer;
-	}
 
 	input:disabled + label {
-		@apply cursor-auto;
+		cursor: auto;
 	}
 
 	input:focus + label {
@@ -142,6 +140,6 @@
 	}
 
 	input[data-checked='true'] + label {
-		@apply text-yellow-400;
+		color: orange;
 	}
 </style>

@@ -10,9 +10,6 @@ export const load: LayoutServerLoad = async ({
 }) => {
 	const { session } = await safeGetSession();
 
-	if (session) {
-		const { data, error } = ProfileController(supabase).getProfile(session.user.id);
-	}
 	return {
 		session,
 		cookies: cookies.getAll(),
