@@ -1,48 +1,22 @@
-import { fail, type Actions } from '@sveltejs/kit';
+import { BusinessController } from '$lib/server/business';
+import type { PageServerLoad } from './$types';
 
-export const actions = {
-	login: async ({ request, locals: { supabase } }) => {
-		const formData = await request.formData();
+export const load: PageServerLoad = async ({ url, locals: { supabase } }) => {
+	const page = parseInt(url.searchParams.get('page') || '1');
+	const limit = 5; // Negocios por página
+	const offset = (page - 1) * limit;
 
-		const email = formData.get('email') as string;
-		const password = formData.get('password') as string;
+	const { data, error } = await BusinessController(supabase).getBusinessResume({
+		businessLimit: limit,
+		productLimit: 10,
+		offset
+	});
 
-		const { error } = await supabase.auth.signInWithPassword({
-			email,
-			password
-		});
-
-		if (error) {
-			console.error(error);
-			return fail(error.status ?? 400, {
-				error: error.message
-			});
-		}
-	},
-	register: async ({ request, locals: { supabase } }) => {
-		const formData = await request.formData();
-
-		const email = formData.get('email') as string;
-		const password = formData.get('password') as string;
-		const first_name = formData.get('first_name') as string;
-		const last_name = formData.get('last_name');
-
-		const { error } = await supabase.auth.signUp({
-			email,
-			password,
-			options: {
-				data: {
-					first_name,
-					last_name
-				}
-			}
-		});
-
-		if (error) {
-			console.error(error);
-			return fail(error.status ?? 400, {
-				error: error.message
-			});
-		}
+	if (error) {
+		throw new Error('Error fetching stores');
 	}
-} satisfies Actions;
+	return {
+		businessData: data,
+		limit
+	};
+};

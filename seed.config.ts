@@ -8,5 +8,5 @@ export default defineConfig({
 		await client.connect();
 		return new SeedPg(client);
 	},
-	select: ['!*', 'public.*', 'auth.users']
+	select: ['!*', 'public.*']
 });

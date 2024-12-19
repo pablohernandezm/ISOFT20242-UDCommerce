@@ -1,15 +1,12 @@
 import { copycat } from '@snaplet/copycat';
-import { createSeedClient, SeedClient } from '@snaplet/seed';
+import { createSeedClient, profilesScalars, SeedClient } from '@snaplet/seed';
+import { createClient } from '@supabase/supabase-js';
 import bcrypt from 'bcrypt';
 
-/*
-const profilePictures = [
-  'https://images.pexels.com/photos/678783/pexels-photo-678783.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=1',
-  'https://images.pexels.com/photos/1080213/pexels-photo-1080213.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=1',
-  'https://images.pexels.com/photos/2589653/pexels-photo-2589653.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=1',
-  'https://images.pexels.com/photos/1081685/pexels-photo-1081685.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=1',
-  'https://images.pexels.com/photos/1462980/pexels-photo-1462980.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=1',
-]*/
+const supabase = createClient(
+	'http://127.0.0.1:54321',
+	'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZS1kZW1vIiwicm9sZSI6ImFub24iLCJleHAiOjE5ODM4MTI5OTZ9.CRXP1A7WOeoJeXxjNni43kdQwgnWNReilDMblYTn_I0'
+);
 
 const businessPictures = [
 	'https://images.pexels.com/photos/25713077/pexels-photo-25713077/free-photo-of-compras-comprando-mercado-estar-de-pie.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=1',
@@ -34,36 +31,11 @@ const main = async () => {
 	await seed.$resetDatabase();
 
 	// Seed the database with 10 users
-	const { users } = await createUsers(seed, 10);
+	await createUsers(10);
+
+	await seedAll(seed);
 
 	// Seed the rest of the tables
-	await seed.business((x) =>
-		x(4, ({ seed }) => ({
-			name: copycat.streetName(seed),
-			owner_id: copycat.oneOf(seed, users).id,
-			business_images: (x) =>
-				x({ max: businessPictures.length }, ({ seed }) => ({
-					image: copycat.oneOf(seed, businessPictures)
-				})),
-			reviews: (x) =>
-				x({ max: users.length }, ({ seed, index }) => ({
-					author_id: users[index].id,
-					rate: copycat.float(seed, { min: 0, max: 5 })
-				})),
-			products: (x) =>
-				x({ max: 10 }, ({ seed }) => ({
-					price: copycat.float(seed, { min: 0, max: 500000 }),
-					name: copycat.words(seed, { max: 3 }),
-					description: copycat.sentence(seed, { minWords: 10, max: 50 }),
-					product_images: (x) =>
-						x({ max: productPictures.length }, ({ seed }) => ({
-							image: copycat.oneOf(seed, productPictures)
-						}))
-				}))
-		}))
-	);
-
-	console.log('Database seeded successfully!');
 
 	process.exit();
 };
@@ -78,50 +50,53 @@ async function hashPassword(password: string) {
 	return hashedPassword;
 }
 
-async function createUsers(seed: SeedClient, n: number = 1, defaultPassword = 'password') {
-	const PASSWORD = await hashPassword(
-		defaultPassword.length >= 8 ? defaultPassword : 'password123'
+async function createUsers(n: number = 1, defaultPassword = 'password') {
+	for (let i = 0; i < n; i++) {
+		const { data, error } = await supabase.auth.signUp({
+			email: copycat.email(i),
+			password: 'password123',
+			options: {
+				data: {
+					first_name: copycat.firstName(i),
+					last_name: copycat.lastName(i)
+				}
+			}
+		});
+
+		await supabase.auth.signOut();
+	}
+}
+
+async function seedAll(seed: SeedClient) {
+	const { data: profilesData } = await supabase.from('profiles').select('*');
+	const profiles: profilesScalars[] = profilesData?.map((profile) => profile) ?? [];
+
+	await seed.business(
+		(x) =>
+			x(4, ({ seed }) => ({
+				name: copycat.streetName(seed),
+				business_images: (x) =>
+					x({ max: businessPictures.length }, ({ seed }) => ({
+						image: copycat.oneOf(seed, businessPictures)
+					})),
+				reviews: (x) =>
+					x({ max: profiles.length }, ({ seed, index }) => ({
+						author_id: copycat.oneOf(seed, profiles).id,
+						rate: copycat.float(seed, { min: 0, max: 5 })
+					})),
+				products: (x) =>
+					x({ max: 10 }, ({ seed }) => ({
+						price: copycat.float(seed, { min: 0, max: 500000 }),
+						name: copycat.words(seed, { max: 3 }),
+						description: copycat.sentence(seed, { minWords: 10, max: 50 }),
+						product_images: (x) =>
+							x({ max: productPictures.length }, ({ seed }) => ({
+								image: copycat.oneOf(seed, productPictures)
+							}))
+					}))
+			})),
+		{ connect: { profiles } }
 	);
 
-	return await seed.users((x) =>
-		x(n, ({ index, seed }) => ({
-			id: copycat.uuid(seed),
-			instance_id: '00000000-0000-0000-0000-000000000000',
-			aud: 'authenticated',
-			role: 'authenticated',
-			email: `user${index}@email.com`,
-			encrypted_password: PASSWORD,
-			// email_confirmed_at: "", // Snaplet will generate this for you
-			invited_at: null,
-			confirmation_token: null,
-			confirmation_sent_at: null,
-			recovery_token: null,
-			recovery_sent_at: null,
-			email_change_token_new: null,
-			email_change: '',
-			email_change_sent_at: null,
-			// last_sign_in_at: "", // Snaplet will generate this for you
-			raw_app_meta_data: { provider: 'email', providers: ['email'] },
-			raw_user_meta_data: {
-				first_name: copycat.firstName(seed),
-				last_name: copycat.lastName(seed)
-			},
-			is_super_admin: null,
-			// created_at: "", // Snaplet will generate this for you
-			// updated_at: "", // Snaplet will generate this for you
-			phone: null,
-			phone_confirmed_at: null,
-			phone_change: '',
-			phone_change_token: '',
-			phone_change_sent_at: null,
-			email_change_token_current: null,
-			email_change_confirm_status: 0,
-			banned_until: null,
-			reauthentication_token: null,
-			reauthentication_sent_at: null,
-			is_sso_user: false,
-			deleted_at: null,
-			is_anonymous: false
-		}))
-	);
+	console.log('Database seeded successfully!');
 }
